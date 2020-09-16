@@ -1,52 +1,55 @@
 package exercise;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ChatServer {
+/**
+ * The chat server implementation
+ */
+public class ChatServer implements ConnectionEventListener {
 
-    private final List<ChatClient> connectedClients = Collections.synchronizedList(new ArrayList<>());
-    private final int port;
+    private final Logger log = LoggerFactory.getLogger(ChatServer.class);
 
-    public ChatServer(int port) {
-        this.port = port;
-    }
+    private final List<ClientConnection> connectedClients = Collections.synchronizedList(new ArrayList<>());
+    private final ConnectionManager connectionManager;
 
     public static void main(String args[]) throws IOException {
-        try {
-            new ChatServer(10000).run();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        new ChatServer(new SocketConnectionManager(10000)).run();
+    }
+
+    public ChatServer(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
     }
 
     void run() throws IOException {
-        // listen on port 10000 for connnections
-        ServerSocket serverSocket = new ServerSocket(port);
-
         while (true) {
-            Socket socket = serverSocket.accept();
-
-            // on receiving connection, store the connection
-            ChatClient client = new ChatClient(socket, this);
-            connectedClients.add(client);
-            client.start();
+            ClientConnection connection = connectionManager.accept(this);
+            connectedClients.add(connection);
+            connection.start();
         }
     }
 
-    void broadcastMessage(ChatClient sender, String message) {
-        for (ChatClient client : connectedClients) {
+    @Override
+    public void messageReceived(ClientConnection clientConnection, String message) {
+        broadcastMessage(clientConnection, message);
+    }
+
+    @Override
+    public void connectionClosed(ClientConnection connection) {
+        connectedClients.remove(connection);
+        log.info("Connection " + connection + " Removed");
+    }
+
+    private void broadcastMessage(ClientConnection sender, String message) {
+        log.info("Broadcast Message: " + message);
+        for (ClientConnection client : connectedClients) {
             if (client != sender) {
                 client.sendMessage(message);
             }
         }
-    }
-
-    public void removeClient(ChatClient client) {
-        connectedClients.remove(client);
     }
 }
