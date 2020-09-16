@@ -8,4 +8,4 @@ Your program should be fully tested too. (provide a link to your solution)
 
 ### How To Run
 
-Execute the `ChatServer` class
+Run the command `gradlew run`, then wait for the message `Ready To Listen on Port: 10000` that will show up in the console.

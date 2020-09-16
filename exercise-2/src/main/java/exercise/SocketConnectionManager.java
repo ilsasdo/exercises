@@ -2,7 +2,6 @@ package exercise;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ public class SocketConnectionManager implements ConnectionManager {
     @Override
     public ClientConnection accept(ConnectionEventListener listener) throws IOException {
         ClientConnection connection = new ClientConnection(this.socket.accept(), listener);
-        log.info("New connection received: "+connection);
+        log.info("New connection received: " + connection);
         return connection;
     }
 }
