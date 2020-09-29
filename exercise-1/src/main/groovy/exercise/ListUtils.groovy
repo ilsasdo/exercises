@@ -1,8 +1,5 @@
 package exercise
 
-import groovy.transform.CompileStatic
-
-@CompileStatic
 class ListUtils {
 
     /**
@@ -11,17 +8,20 @@ class ListUtils {
      * @param the nested arrays of integers
      * @return the list of all the integers in a "flat" list.
      */
-    static List<Integer> flatten(List integers) {
-        List<Integer> flattened = []
+    static List flatten(List list) {
+        List acc = []
+        List stack = [list]
 
-        for (Object entry : integers) {
-            if (entry instanceof Integer) {
-                flattened.add(entry)
-            } else if (entry instanceof List) {
-                flattened.addAll(flatten(entry))
+        while (stack.size() > 0) {
+            Object l = stack.remove(0)
+
+            if (l instanceof List) {
+                stack.addAll(0, l)
+            } else {
+                acc << l
             }
         }
 
-        return flattened
+        return acc
     }
 }
